@@ -85,12 +85,10 @@ movie-analytics-adf-project/
 │   └── transformations/
 │       └── df_transform_moviesdb.json                   # Mapping Data Flow definition
 │
-├── scripts/
-│   └── deployment/
-│       └── deploy_adf_resources.ps1                     # (Optional) Deployment script
-│
 ├── docs/
-│   └── architecture.md                                  # (Optional) Architecture documentation
+│   ├── architecture.md                                  # Architecture documentation
+│   └── architecture.png                                 # (Optional) Architecture diagram image
+│   └── dataflow_transformation.png                      # (Optional) Data Flow transformation image
 │
 └── README.md                                            # Main project documentation
 ```
