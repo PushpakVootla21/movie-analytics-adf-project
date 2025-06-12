@@ -1,0 +1,22 @@
+{
+    "name": "ds_http_csv",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "HttpServer1",
+            "type": "LinkedServiceReference"
+        },
+        "annotations": [],
+        "type": "DelimitedText",
+        "typeProperties": {
+            "location": {
+                "type": "HttpServerLocation",
+                "relativeUrl": "Datasets/refs/heads/main/Files/moviesDB.csv"
+            },
+            "columnDelimiter": ",",
+            "escapeChar": "\\",
+            "firstRowAsHeader": true,
+            "quoteChar": "\""
+        },
+        "schema": []
+    }
+}

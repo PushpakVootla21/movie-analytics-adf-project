@@ -1,0 +1,17 @@
+{
+    "name": "ls_azuresql_db",
+    "type": "Microsoft.DataFactory/factories/linkedservices",
+    "properties": {
+        "annotations": [],
+        "type": "AzureSqlDatabase",
+        "typeProperties": {
+            "server": "<your-server-name>.database.windows.net",
+            "database": "<your-database-name>",
+            "encrypt": "mandatory",
+            "trustServerCertificate": false,
+            "authenticationType": "SQL",
+            "userName": "<your-username>",
+            "encryptedCredential": "<your-encrypted-credential>"
+        }
+    }
+}

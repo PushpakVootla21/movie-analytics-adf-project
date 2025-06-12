@@ -1,5 +1,18 @@
 # movie-analytics-adf-project
 
+## 📑 Table of Contents
+
+- [🎯 Objective](#-objective)
+- [🔄 Data Flow & Transformations](#-data-flow--transformations)
+- [🏗️ Architecture Overview](#️-architecture-overview)
+- [📁 Project Structure](#-project-structure)
+- [📥 Activity One: Data Ingestion](#-activity-one-data-ingestion)
+- [🔄 Activity Two: Data Transformation Pipeline](#-activity-two-data-transformation-pipeline)
+- [🛠️ Activity Three: Transformation Pipeline Orchestration](#-activity-three-transformation-pipeline-orchestration)
+- [🚀 How to Run](#-how-to-run)
+
+---
+
 ## 🎯 Objective
 
 Analyze movie data for ABCD Company based on ratings using Azure Data Factory and Data Flow.
@@ -11,7 +24,7 @@ Analyze movie data for ABCD Company based on ratings using Azure Data Factory an
    After reading from the `raw` container, `archive` the original file.
 
 2. **Column Rename:**  
-   Change column value `'Rotton'` to `'Rotten'` in the `Name as` field.
+  Change column name `'Rotton Tomato'` to `'Rotten Tomato'` for consistency.
 
 3. **Drop Column:**  
    Remove the `Rating` column.
@@ -28,7 +41,7 @@ Analyze movie data for ABCD Company based on ratings using Azure Data Factory an
 7. **Group Analysis:**  
    For each **genre-year** group, calculate:
    - Average Rotten Tomatoes rating
-   - Highest and lowest rated movie
+   - Highest and lowest Rotten Tomatoes rating
    - Number of movies in the group
 
 8. **Data Validation:**  
@@ -36,7 +49,7 @@ Analyze movie data for ABCD Company based on ratings using Azure Data Factory an
 
 9. **Routing Based on Year:**  
    - If movie year is **before 1950**: Move to `processed` folder in Blob Storage.
-   - If movie year is **19500 or later**: Move to **SQL database**.
+   - If movie year is **1950 or later**: Move to **SQL database**.
 
 ---
 
@@ -45,7 +58,7 @@ Analyze movie data for ABCD Company based on ratings using Azure Data Factory an
 - **Azure Data Factory** orchestrates the workflow.
 - **Azure Data Flow** performs transformations.
 - **Azure Blob Storage** stores raw, archived, and processed files.
-- **Azure SQL Database** stores processed data for movies from 1970 onwards.
+- **Azure SQL Database** stores processed data for movies from 1950 onwards.
 
 ---
 
@@ -56,15 +69,30 @@ movie-analytics-adf-project/
 │
 ├── datafactory/
 │   ├── pipelines/
+│   │   ├── df_moviesdb_ingestion_pipeline.json           # Ingestion pipeline definition
+│   │   └── df_movesdb_transform_pipeline.json            # Pipeline that executes the data flow
 │   ├── datasets/
+│   │   ├── ds_http_csv.json                             # HTTP (GitHub CSV) dataset
+│   │   ├── ds_adls_csv.json                             # ADLS raw container dataset
+│   │   ├── ds_adls_cleandatasink.json                   # ADLS processed/clean data dataset
+│   │   └── AzureSqlTable1.json                          # Azure SQL Table dataset
 │   └── linkedservices/
+│       ├── ls_http_github.json                          # Linked service for GitHub HTTP
+│       ├── ls_adls_gen2.json                            # Linked service for ADLS Gen2
+│       └── ls_azuresql_db.json                          # Linked service for Azure SQL DB
+│
 ├── dataflow/
 │   └── transformations/
+│       └── df_transform_moviesdb.json                   # Mapping Data Flow definition
+│
 ├── scripts/
 │   └── deployment/
+│       └── deploy_adf_resources.ps1                     # (Optional) Deployment script
+│
 ├── docs/
-│   └── architecture.md
-└── README.md
+│   └── architecture.md                                  # (Optional) Architecture documentation
+│
+└── README.md                                            # Main project documentation
 ```
 ---
 
@@ -252,6 +280,11 @@ This pipeline automates the execution of your transformation logic, ensuring tha
 2. Trigger the Data Factory ingestion pipeline to copy `moviesDB.csv` from GitHub to the `raw` container in Azure Blob Storage.
 3. Once the file is ingested, trigger the transformation pipeline to process the data as per the business requirements.
 4. Monitor pipeline runs in Azure Data Factory for any errors or warnings.
-5. After successful execution, check the outputs in the processed folder (for movies before 1970) and in the SQL database (for movies from 1970 onwards).
+5. After successful execution, check the outputs in the processed folder (for movies before 1950) and in the SQL database (for movies from 1950 onwards).
 
 ---
+## 📚 Further Reading
+
+- [Azure Data Factory Linked Services](https://learn.microsoft.com/en-us/azure/data-factory/linked-services-introduction)
+- [Azure Data Factory Datasets](https://learn.microsoft.com/en-us/azure/data-factory/concepts-datasets-linked-services)
+- [Azure Data Factory Mapping Data Flows](https://learn.microsoft.com/en-us/azure/data-factory/concepts-data-flow-overview)

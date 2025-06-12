@@ -1,0 +1,15 @@
+{
+    "name": "ls_adls_gen2",
+    "type": "Microsoft.DataFactory/factories/linkedservices",
+    "properties": {
+        "annotations": [],
+        "type": "AzureBlobFS",
+        "typeProperties": {
+            "url": "https://<your-storage-account>.dfs.core.windows.net/",
+            "tenant": "<your-tenant-id>",
+            "servicePrincipalId": "<your-service-principal-id>",
+            "servicePrincipalCredentialType": "ServicePrincipalKey",
+            "encryptedCredential": "<your-encrypted-credential>"
+        }
+    }
+}

@@ -1,0 +1,108 @@
+{
+    "name": "df_transform_moviesdb",
+    "properties": {
+        "type": "MappingDataFlow",
+        "typeProperties": {
+            "sources": [
+                {
+                    "dataset": {
+                        "referenceName": "ds_adls_csv",
+                        "type": "DatasetReference"
+                    },
+                    "name": "sourcestream"
+                }
+            ],
+            "sinks": [
+                {
+                    "dataset": {
+                        "referenceName": "ds_adls_cleandatasink",
+                        "type": "DatasetReference"
+                    },
+                    "name": "sinkstreams",
+                    "rejectedDataLinkedService": {
+                        "referenceName": "AzureDataLakeStorage1",
+                        "type": "LinkedServiceReference"
+                    }
+                },
+                {
+                    "dataset": {
+                        "referenceName": "AzureSqlTable1",
+                        "type": "DatasetReference"
+                    },
+                    "name": "dbsink"
+                }
+            ],
+            "transformations": [
+                { "name": "select1" },
+                { "name": "filter1" },
+                { "name": "derivedColumn1" },
+                { "name": "Rankingstream" },
+                { "name": "aggregate1" },
+                { "name": "QualityStreamcheck" },
+                { "name": "split1" },
+                { "name": "AlterRow1" }
+            ],
+            "scriptLines": [
+                "source(output(",
+                "          movie as integer,",
+                "          title as string,",
+                "          genres as string,",
+                "          year as short,",
+                "          Rating as short,",
+                "          {Rotton Tomato} as short",
+                "     ),",
+                "     allowSchemaDrift: true,",
+                "     validateSchema: false,",
+                "     ignoreNoFilesFound: false,",
+                "     moveFiles: ['raw','archive']) ~> sourcestream",
+                "sourcestream select(mapColumn(",
+                "          movie,",
+                "          title,",
+                "          genres,",
+                "          year,",
+                "          {Rotten Tomato} = {Rotton Tomato}",
+                "     ),",
+                "     skipDuplicateMapInputs: true,",
+                "     skipDuplicateMapOutputs: true) ~> select1",
+                "select1 filter(year>1910 && year<2000) ~> filter1",
+                "filter1 derive(genres = iif(instr(genres,'|') > 0, substring(genres, 1, instr(genres, '|')-1), genres)) ~> derivedColumn1",
+                "derivedColumn1 window(over(genres,",
+                "          year),",
+                "     desc({Rotten Tomato}, false),",
+                "     movies_ranking = rank()) ~> Rankingstream",
+                "Rankingstream aggregate(groupBy(genres,",
+                "          year),",
+                "     avg_rotten_tomato = avg({Rotten Tomato}),",
+                "          max_rotten_tomato = max({Rotten Tomato}),",
+                "          min_rotten_tomato = min({Rotten Tomato}),",
+                "          total_movies = count(movie)) ~> aggregate1",
+                "aggregate1 assert(expectTrue(toInteger(year) > 1920, true, 'assert1', null, toString(year)+'less than 1920')) ~> QualityStreamcheck",
+                "QualityStreamcheck split(toInteger(year) < 1950,",
+                "     disjoint: false) ~> split1@(lessthan1950, greaterthan1950)",
+                "split1@greaterthan1950 alterRow(upsertIf(true())) ~> AlterRow1",
+                "split1@lessthan1950 sink(allowSchemaDrift: true,",
+                "     validateSchema: false,",
+                "     umask: 0022,",
+                "     preCommands: [],",
+                "     postCommands: [],",
+                "     skipDuplicateMapInputs: true,",
+                "     skipDuplicateMapOutputs: true,",
+                "     outputAssertFailedRows: true,",
+                "     assertFailure_fileSystem: 'moviesdb',",
+                "     assertFailure_folderPath: 'error',",
+                "     ignoreAssertFailedRows: true) ~> sinkstreams",
+                "AlterRow1 sink(allowSchemaDrift: true,",
+                "     validateSchema: false,",
+                "     deletable:false,",
+                "     insertable:true,",
+                "     updateable:false,",
+                "     upsertable:false,",
+                "     recreate:true,",
+                "     format: 'table',",
+                "     skipDuplicateMapInputs: true,",
+                "     skipDuplicateMapOutputs: true,",
+                "     errorHandlingOption: 'stopOnFirstError') ~> dbsink"
+            ]
+        }
+    }
+}
